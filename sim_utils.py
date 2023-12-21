@@ -30,7 +30,7 @@ def arc_trace(orientation: Tensor,
 def arc_trace_centered(velocity: Tensor, 
               rudder_angle: Tensor, 
               time_steps: int = 10,
-              record_resolution: int = 1) -> Tuple(Tensor, Tensor):
+              record_resolution: int = 1) -> List[Tensor]:
     """A function for tracing an arc-segment of a ship's trajectory.
     Toy model which simply assumes that the arc radius depends purely on rudder angle.
     Centers the coordinate frame on the ship, and rotates it so the ships starts
@@ -39,25 +39,27 @@ def arc_trace_centered(velocity: Tensor,
     Args:
         velocity (Tensor): the ship's velocity for the present timestep.
         rudder_angle (Tensor): the rudder angle relative to the ship's orientation.
-        trajectory (List[Tensor]): the trajectory so far, as a list of position coordinates.
         time_step (float): amount of time over which to integrate trajectory.
         record_resolution (float): the time resolution with which the position of ship is recorded.
     """
-    assert torch.abs(rudder_angle) <= torch.pi/4, "abs(rudder_angle) must be <= pi/4"
+    assert torch.abs(torch.tensor(rudder_angle)) <= torch.pi/4, "abs(rudder_angle) must be <= pi/4"
     assert time_steps%record_resolution==0, "record_resolution must be a factor of time_steps"
     
     # assume a 100 unit arc_radius at 45 degree rudder
     arc_radius = 100/torch.tan(rudder_angle)
     total_steps = time_steps//record_resolution
     position_deltas = []
-    for i in range(total_steps):
-        distance_moved = velocity*record_resolution*(total_steps+1)
-        subtended_angle = distance_moved/arc_radius
-        new_position_delta = distance_moved*(sin(subtended_angle), cos(subtended_angle))
-        position_deltas.append(new_position_delta)
+    distances_moved = velocity*record_resolution*torch.arange(1,total_steps+1)
+    if rudder_angle==0:
+        zero_x = torch.zeros_like(distances_moved)
+        return torch.stack([zero_x, distances_moved], dim=1)
+    else:
+        subtended_angles = distances_moved/arc_radius
+        new_positions_x = arc_radius*sin(subtended_angles)
+        new_positions_y = arc_radius*cos(subtended_angles)
+        position_deltas = torch.stack([new_positions_x, new_positions_y],dim=1)
 
-    return position_deltas
-
+        return position_deltas    
     
 
     
