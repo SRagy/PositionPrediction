@@ -1,12 +1,15 @@
 import torch
 import types
+from sim_utils import arc_trace
 
 class Simulator:
     """A toy simulator for a marine vessel.
 
     """
-    def __init__(self, time_resolution=10, initial_position=torch.tensor([0,0]), 
-                 initial_orientation=torch.tensor(0), initial_rudder_angle=torch.tensor(0)):
+    def __init__(self, time_resolution=10, 
+                 wobbliness=torch.tensor(0.1),
+                 oomphness=torch.tensor(0.1),
+                 ):
         """_summary_
 
         Args:
