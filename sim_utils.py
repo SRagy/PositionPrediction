@@ -2,7 +2,7 @@ import torch
 from torch import Tensor, cos, sin
 from typing import List, Tuple
 
-def arc_trace_centered(velocity: Tensor, 
+def arc_trace_centered(speed: Tensor, 
               rudder_angle: Tensor, 
               time_steps: int = 10,
               record_resolution: int = 1) -> Tuple[Tensor, Tensor]:
@@ -15,7 +15,7 @@ def arc_trace_centered(velocity: Tensor,
     takes the limiting case of travelling in a straight line.
 
     Args:
-        velocity (Tensor): the ship's velocity for the present timestep.
+        speed (Tensor): the ship's speed for the present timestep. Negative values indicate reversing.
         rudder_angle (Tensor): the rudder angle relative to the ship's orientation.
         time_step (float): amount of time over which to integrate trajectory.
         record_resolution (float): the time resolution with which the position of ship is recorded.
@@ -32,10 +32,10 @@ def arc_trace_centered(velocity: Tensor,
     turn_radius = 100/torch.tan(rudder_angle)
     total_steps = time_steps//record_resolution
     position_deltas = []
-    distances_moved = velocity*record_resolution*torch.arange(1,total_steps+1)
+    distances_moved = speed*record_resolution*torch.arange(1,total_steps+1)
     if rudder_angle==0:
         zero_x = torch.zeros_like(distances_moved)
-        return torch.stack([zero_x, distances_moved], dim=1)
+        return torch.stack([zero_x, distances_moved], dim=1), torch.tensor(0.)
     else:
         subtended_angles = distances_moved/turn_radius
         new_positions_x = turn_radius*cos(subtended_angles)-turn_radius
@@ -70,7 +70,7 @@ def translate_and_rotate_arc(init_position, init_orientation, position_deltas, o
 
 def arc_trace(orientation: Tensor, 
               position: Tensor,
-              velocity: Tensor, 
+              speed: Tensor, 
               rudder_angle: Tensor, 
               time_steps: int = 10,
               record_resolution: int = 1) -> Tuple[Tensor, Tensor]:
@@ -84,7 +84,7 @@ def arc_trace(orientation: Tensor,
     
     Args:
         orientation (Tensor): the ship's angle relative to coordinate axes. 
-        velocity (Tensor): the ship's velocity for the present timestep.
+        speed (Tensor): the ship's speed for the present timestep.
         rudder_angle (Tensor): the rudder angle relative to the ship's orientation.
         trajectory (List[Tensor]): the trajectory so far, as a list of position coordinates.
         time_step (float): amount of time over which to integrate trajectory.
@@ -96,7 +96,7 @@ def arc_trace(orientation: Tensor,
         recorded depends on record_resolution.
         2. The new orientation at the end of the arc of the trajectory.
     """
-    position_deltas, orientation_delta = arc_trace_centered(velocity, rudder_angle, 
+    position_deltas, orientation_delta = arc_trace_centered(speed, rudder_angle, 
                                                             time_steps, record_resolution)
 
     new_positions, new_orientation = translate_and_rotate_arc(position, orientation, 
