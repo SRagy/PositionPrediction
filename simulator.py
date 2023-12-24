@@ -6,7 +6,7 @@ from sim_utils import arc_trace
 pi = torch.tensor(torch.pi)
 
 class Simulator:
-    """A toy simulator for a marine vessel.
+    """A toy simulator for a marine vessel. Callable.
 
     """
     def __init__(self, 
@@ -33,18 +33,20 @@ class Simulator:
 
     def sample_new_angle(self, current_angle: Tensor):
         """A function to sample a new rudder direction. Changes angle with p(wobbliness).
-        If angle is changed, there is a 50% change it resets to neutral and and a 50% chance
-        it samples from a Gaussian and 
+        If angle is changed, there is an 80% change it resets to neutral and a 20% chance
+        it samples from a Gaussian and adds this to the current angle.
 
         Args:
             current_angle (Tensor): a scalar torch tensor representing start angle
         """
         change_angle = self.wobbliness_dist.sample()
+        # Ordinarily if the angle is changed, we want to straighten out.
         reset_angle = Bernoulli(0.8).sample()
         
         if change_angle and reset_angle:
             new_angle = torch.tensor(0.)
         elif change_angle and not reset_angle:
+            # If a change occurs, and it isn't a reset, then we sample a new angle
             new_angle_delta = Normal(0,0.03).sample()
             new_angle = current_angle + new_angle_delta
         else: # No change.
@@ -52,7 +54,7 @@ class Simulator:
 
         
 
-        # Constrain to be between -pi/5 and pi/5.
+        # Constrain rudder angle to be between -pi/5 and pi/5 (i.e. +/- 36 degrees.)
         new_angle = max(-pi/5, min(new_angle, pi/5))
 
         return new_angle
@@ -83,7 +85,7 @@ class Simulator:
                 speed: Tensor = torch.tensor(7.), # 7m/s about 25km/h or 13.5 knots.
                 orientation: Tensor = torch.tensor(0.), 
                 rudder_angle: Tensor = torch.tensor(0.)):
-        """_summary_
+        """Evaluates 
 
         Args:
             position (Tensor, optional): position at initialisation. Defaults to torch.tensor([0.,0.]).
