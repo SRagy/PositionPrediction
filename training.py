@@ -54,7 +54,6 @@ def get_dataloaders(file='end_points.pt',
         _type_: _description_
     """
     
-    cut_off = round(len(data)*val_ratio)
 
 
     if exists(file):
@@ -71,6 +70,7 @@ def get_dataloaders(file='end_points.pt',
         if save_data:
             torch.save(data, file)
 
+    cut_off = round(len(data)*val_ratio)
     train_data = data[cut_off:]
     val_data = data[:cut_off]
     train_loader = DataLoader(train_data, batch_size, shuffle=True)
@@ -94,7 +94,7 @@ class Trainer:
                  early_stop_bound: int = 20,
                  max_epochs: int = 500,
                  optimizer: Optimizer = Adam,
-                 base_learning_rate: float = 5e-3,
+                 base_learning_rate: float = 0.01,
                  use_lr_scheduler: bool = True,
                  ) -> None:
         """
@@ -150,7 +150,7 @@ class Trainer:
         """
         self.density_estimator.train()
         total_loss = 0.
-        for params in enumerate(dataloader):
+        for params in dataloader:
             loss = self._loss(params)
             total_loss+=loss.detach()
             self._optimizer.zero_grad()
@@ -172,8 +172,8 @@ class Trainer:
     def log_and_print(self, train_loss, val_loss, since_improvement):
         self.train_losses.append(train_loss)
         self.val_losses.append(val_loss)
-        print(f'epoch = {self._trained_epochs}, train loss = f{train_loss}, val loss = f{val_loss}\
-              epochs since improvement = f{since_improvement} \r')
+        print(f'epoch = {self._trained_epochs}, train loss = {train_loss}, val loss = {val_loss}\
+              epochs since improvement = {since_improvement} \r')
 
 
     def train(self, epochs = 200):
@@ -194,8 +194,8 @@ class Trainer:
         rounds_since_improvement = 0
         for i in range(epochs):
             self._trained_epochs += 1
-            train_loss = self.training_loop()
-            val_loss = self.validation_loop
+            train_loss = self.training_loop(self._train_loader)
+            val_loss = self.validation_loop(self._val_loader)
             if val_loss < best_loss:
                 best_loss = val_loss
                 rounds_since_improvement = 0

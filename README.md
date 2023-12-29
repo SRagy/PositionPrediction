@@ -3,7 +3,7 @@
 This is a small toy project to predict the paths of moving objects, e.g. marine vessels. Its main purpose is as a CV-padder, so it is relatively simple, but if it contains any code which you find useful, feel free to use it with reference. This section of the README acts as a write-up and rationale. The [Package Structure](./README.md#Package-Structure) section outlines the package structure and use.
 
 ## Theoretical considerations
-### Trajectories or not?
+### Trajectories or not
 
 Strictly speaking, this project does not predict trajectories, but it predicts future locations at a set time, i.e. the end-point of the trajectory up to that moment. It could be altered to predict trajectories by outputting a vector of locations, or it could be altered to be conditional on time, so that it can make predictions for arbitrary time points. However, for many purposes this implementation is sufficient; if we are tracking an object using observations at fixed time intervals then information of what is happening *between* those intervals is extraneous.
 
@@ -14,6 +14,9 @@ No. Object tracking is about consistent identification of over a set of frames. 
 Here I assume that a method for object-identification already exits.
 
 However, this is a known problem for which there exist mature methods - Kalman filtering in particular comes to mind. I do not consider Kalman Filtering here, but it should be checked as a bench mark at the very least.
+
+### Does this relate to Kalman filtering?
+While Kalman filtering is used 
 
 ### Stochastic processes need stochastic predictions
 For a stochastic process, even given the exact same input conditions the outcome is not guaranteed. This is sometimes considered to be because of latent unobserved variables, but if you ask a quantum physicist, it is a fundamental property of performing observations.
