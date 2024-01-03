@@ -172,8 +172,10 @@ class Trainer:
     def log_and_print(self, train_loss, val_loss, since_improvement):
         self.train_losses.append(train_loss)
         self.val_losses.append(val_loss)
-        print(f'epoch = {self._trained_epochs}, train loss = {train_loss}, val loss = {val_loss}\
-              epochs since improvement = {since_improvement} \r')
+        print(f'\r epoch = {self._trained_epochs}, '
+              f'train loss = {train_loss:.3e}, '
+              f'val loss = {val_loss:.3e}, '
+              f'epochs since improvement = {since_improvement}', end='')
 
 
     def train(self, epochs = 200):

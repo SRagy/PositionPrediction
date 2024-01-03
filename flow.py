@@ -11,18 +11,34 @@ from nflows.nn import nets
 from nflows.transforms.splines import rational_quadratic
 from nflows.transforms import MaskedPiecewiseRationalQuadraticAutoregressiveTransform
 
-class sbi_nn(torch.nn.Module):
-    def __init__(self, sample, type='nsf'):
+
+class UnconditionalFlow(torch.nn.Module):
+    def __init__(self, sample: Tensor, type: str = 'nsf'):
+        """A normalising flow with architecture import from the sbi
+        module.
+
+        Args:
+            sample (Tensor): n x m sample from the data, where n is training batch size.
+            type (str, optional): Choose flow type from 'maf', 'mdn', 'nsf', 'made'. Defaults to 'nsf'.
+        """
         # type one of 'maf', 'mdn', 'nsf', 'made'
         super().__init__()
         nn_builder = posterior_nn(model = type)
-        #theta_sample = gen_model.prior.sample((2,))
         theta_sample = sample
+        # Make flow unconditional by setting a fixed conditioning variable.
         self.dummy_x = torch.zeros(2,1)
         self.nn = nn_builder(theta_sample, self.dummy_x)
         self.params = self.nn.parameters()
 
-    def log_prob(self, theta):
+    def log_prob(self, theta: Tensor):
+        """Returns log probability density of sample theta.
+
+        Args:
+            theta (Tensor): n x m batch of samples.
+
+        Returns:
+            Tensor: n x 1 batch of log probabilities.
+        """
         batch_dim = theta.size(0)
         dummy_x = torch.zeros(batch_dim,1)
         return self.nn.log_prob(theta, context=dummy_x)

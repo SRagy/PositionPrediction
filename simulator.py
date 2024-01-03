@@ -114,5 +114,15 @@ class Simulator:
                 speed: Tensor = torch.tensor(7.), # 7m/s about 25km/h or 13.5 knots.
                 orientation: Tensor = torch.tensor(0.), 
                 rudder_angle: Tensor = torch.tensor(0.)):
+        """Evaluates 
 
+        Args:
+            position (Tensor, optional): position at initialisation. Defaults to torch.tensor([0.,0.]).
+            speed (Tensor, optional): signed speed. Defaults to torch.tensor(7.).
+            orientation (Tensor, optional): the direction the ship is facing. Defaults to torch.tensor(0.).
+            rudder_angle (Tensor, optional): Defaults to torch.tensor(0.).
+
+        Returns:
+            Tuple(Tensor, Tensor, Tensor): position, orientation, trajectory
+        """
         return self.forward(position, speed, orientation, rudder_angle)
