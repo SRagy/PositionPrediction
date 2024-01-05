@@ -6,14 +6,16 @@ pip install -r requirements.txt
 ```
 
 # Location prediction using density estimation
-This section of the README acts as a write-up and rationale. The [Package Structure](./README.md#Package-Structure) section outlines the package structure and use. If you're busy and would rather just dive in with an example, check out the [Track and Visualise Notebook](./TrackAndVisualise.ipynb).
+This section of the README acts as a write-up and rationale. The [Package Structure](./README.md#Package-Structure) section outlines the package structure and use. If you're busy and would rather just dive in with an example, check out the [Track and Visualise Notebook](./TrackAndVisualise.ipynb/).
 
 This is a small toy project to predict the paths of moving objects, e.g. marine vessels. Its main purpose is as a CV-padder, so it is relatively simple, but if it contains any code which you find useful, feel free to use it with reference. 
 
 ## Theoretical considerations
-### Trajectories or not
+### Trajectories
 
-Strictly speaking, this project does not predict trajectories, but it predicts future locations at a set time, i.e. the end-point of the trajectory up to that moment. It could be altered to predict trajectories by outputting a vector of locations, or it could be altered to be conditional on time, so that it can make predictions of the end-point at any time step (hence the trajectory). However, for many purposes this implementation is sufficient; if we are tracking an object using observations at fixed time intervals then information of what is happening *between* those intervals is extraneous.
+Strictly speaking, this project does not predict trajectories - it predicts future locations after a set time has passed, i.e. the end-point of the trajectory up to that time. For many purposes this implementation is sufficient; if we are tracking an object using observations at fixed time intervals then information of what is happening *between* those intervals is extraneous. 
+
+It could be altered to predict trajectories by outputting a vector of locations, or by making it conditional on time.
 
 ### Isn't this just object tracking?
 
@@ -22,36 +24,35 @@ No. Object tracking is about consistent identification of an object and its loca
 Here I assume that a method for object-identification already exits, but that the object is rarely observed, which is not the same as in object tracking.
 
 ### Does this relate to Kalman filtering?
-Kalman filtering is used in similar situations and may have some use for a real-world extension of this sort of model, although I haven't thought about it deeply. Given a model, Kalman filtering reconciles the stochastic dynamics of the model with the noisy real-world observations of its outcomes. Here I'm assuming noiseless observations and, in its present state, I haven't implemented multi-step tracking, although it is not a big extension of the current code to do so. In short, Kalman filtering is not relevant to this example, but might have application to a more sophisticated one.
+Kalman filtering is used in similar situations and may have some use for a real-world extension of this sort of application, although I haven't thought about it deeply. Given a model, Kalman filtering reconciles the stochastic dynamics of the model with the noisy real-world observations of its outcomes. Here I'm assuming noiseless observations and, in its present state, I haven't implemented multi-step tracking, although it is not a big extension of the current code to do so. In short, Kalman filtering is not relevant to this example, but might have application to a more sophisticated one.
 
 ### Stochastic processes need stochastic predictions
 For a stochastic process, even given the exact same input conditions, the outcome is not guaranteed. This is sometimes considered to be because of latent unobserved variables, but if you ask a quantum physicist, it is a fundamental property of performing observations.
 
-In cases where certainty is important, we should model the uncertainties which are present. Producing a single estimate for the state of a system - even if it is the best one - throws away a lot of information. This is why stochastic [density estimators](./README.md#Density-estimators), which produce stochastic predictions work well for this project.
+In cases where certainty is important, we should model the uncertainties which are present. Producing a single estimate for the state of a system - even if it is the most likely one - throws away a lot of possibilities. This is why stochastic [density estimators](./README.md#Density-estimators), which produce stochastic predictions work well for this project.
 
 ## The simulator
 We need a simulator to generate fake data. The simulator is not a critical part of the application - we just need some data from somewhere. I've written a simulator with a toy model of a moving sea vessel. See the below image for 100 simulated trajectories from this simulator with the default settings (axes can be presumed to be in metres, but it doesn't really matter.)
 
-![trajectories](./trajectories.png)
+![trajectories](data/trajectories.png)
 
 ## Density estimators
-Given a set of observations are drawn from some underlying probability distribution a density estimator attempts to learn the distribution that these observations came from. There are two main modes for density estimators
+Given data from some underlying probability distribution a density estimator attempts to learn the distribution that this data came from. There are two main modes for density estimators
 
 1. sampling
 2. likelihood evaluation
 
-Generative AI, such as GANs do 1. and Bayesian methods such as variational inference, are helpful for point 2. Normalising flows, which I use in this project, can do both. The reason why both procedures are valuable is demonstrated in the extended example of the [Track and Visualise Notebook](./TrackAndVisualise.ipynb)
+Generative AI, such as GANs do 1. and Bayesian methods such as variational inference, are helpful for point 2. Normalising flows, which I use in this project, can do both. The reason why both procedures are valuable is demonstrated in the extended example of the [Track and Visualise Notebook](./TrackAndVisualise.ipynb/)
 
 ### Conditioning
-It is not difficult to extend the model to condition upon informative data such as the ship bearing or velocity. However, given that I initialise all ships under the same conditions in the simulator I've written, this is not productive for this project in its current state. Some examples of interesting real-world conditioners:
+It is not difficult to extend the model to condition upon informative data such as the ship bearing or velocity. However, I do not consider this in the present implementation. Some examples of interesting real-world conditioners:
 
 1. GPS location
-2. Depth-gradient
+2. Depth and depth gradient
 3. Bearing of nearest port
 4. Vessel id
 5. Weather
 6. Currents
-
 
 # Package Structure
 There are four main files
