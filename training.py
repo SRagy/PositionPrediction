@@ -147,7 +147,7 @@ class Trainer:
         self.density_estimator.train()
         total_loss = 0.
         for params in dataloader:
-            params.to(self._device)
+            params = params.to(self._device)
             loss = self._loss(params)
             total_loss+=loss.detach()
             self._optimizer.zero_grad()
@@ -163,6 +163,7 @@ class Trainer:
             dataloader (DataLoader): Expects a dataloader with unlabelled data. 
         """
         self.density_estimator.eval()
+        dataset = dataloader.dataset.to(self._device)
         loss = self._loss(dataloader.dataset)
         return loss
     
