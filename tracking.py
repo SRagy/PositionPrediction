@@ -6,7 +6,7 @@ import warnings
 
 
 
-class Tracker:
+class Tracker2D:
     """Tracker class. Given a trained density estimator, searches for object. Assumes scans in small
     square regions with size determined by scan_radius. The area_of_interest refers to the full search
     region, not just the immediate scan area. If initialised with a set of points to check, then will
@@ -26,7 +26,7 @@ class Tracker:
                  scan_radius: float,
                  area_of_interest: Tensor = None,
                  points_to_check: Tensor = None):
-        """Initialises Base Tracker class
+        """Initialises base Tracker class
 
         Args:
             density_estimator (Flow): A density estimator for trajectory end points
@@ -51,7 +51,7 @@ class Tracker:
         """
 
         densities = self.density_estimator.log_prob(points)
-        density_rank_index = densities.sort().indices
+        density_rank_index = densities.sort(descending=True).indices
 
         return points[density_rank_index]
     
@@ -61,7 +61,7 @@ class Tracker:
 
         Args:
             area (Tensor): Tensor defining a square's boundaries: [[left, right], [bottom, top]].
-            points (Tensor): Either an m-dimensional point or an nxm batch of points.
+            points (Tensor): Either an 2-dimensional point or an nx2 batch of points.
         Returns:
             Tensor: The set of points which fall in the given area.
         """
@@ -118,7 +118,7 @@ class Tracker:
         return sorted_points[:i+1], True
 
                     
-class SamplingTracker(Tracker):
+class SamplingTracker2D(Tracker2D):
     """Tracker which checks in region around sampled points. May be useful for cases where
     the path is quite predictable and we don't want to evaluate a whole grid of log_probs.
 
@@ -147,7 +147,7 @@ class SamplingTracker(Tracker):
         points_to_check = density_estimator.sample(num_samples).detach()
         return super().__init__(density_estimator, scan_radius, area_of_interest, points_to_check)
 
-class GridTracker(Tracker):
+class GridTracker2D(Tracker2D):
     """Tracker which establishes a grid of points in the area of interest, and scans around these.
     If an area_of_interest is given, then the grid is generated within this area, with grid-size
     matching scan_radius as closely as possible (subject to the constraint of full coverage).
@@ -231,7 +231,7 @@ class GridTracker(Tracker):
             points (Tensor): The points to be enclosed by the bounding box
             mult_factor (float, optional): Multiplies size of bounding box. Defaults to 1.
         Returns:
-            Tensor: _description_
+            Tensor: Boundaries for a rectangular area of interest: [[left, right], [bottom, top]]
         """
 
         axes_max = points.max(dim=0).values

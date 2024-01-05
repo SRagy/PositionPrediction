@@ -44,17 +44,24 @@ def arc_trace_centered(speed: Tensor,
 
         return position_deltas, subtended_angles[-1]
     
-def translate_and_rotate_arc(init_position, init_orientation, position_deltas, orientation_delta):
-    """Given an arc in space, 
+def translate_and_rotate_arc(init_position: Tensor, 
+                             init_orientation: Tensor, 
+                             position_deltas: Tensor,
+                             orientation_delta: Tensor):
+    """ 1. Takes an arc defined by position_deltas, with coordinate axes presumed vertical and initial
+    position presumed to be the origin.
+    2. Rotates by init_orientation, to correct for verticality assumption. 
+    3. Translates from [0, 0] to init_position to correct for origin assumption.
+    4. Returns new arc and orientation at the end of the arc for future use.
 
     Args:
-        init_position (_type_): _description_
-        init_orientation (_type_): _description_
-        position_deltas (_type_): _description_
-        orientation_delta (_type_): _description_
+        init_position (Tensor): The starting point of the arc
+        init_orientation (Tensor): The initial angle of the coordinate frame
+        position_deltas (Tensor): positions tracing an arc
+        orientation_delta (Tensor): the change in orientation from start to end of arc
 
     Returns:
-        _type_: _description_
+        Tuple(Tensor): (new position tensor, new orientation tensor)
     """
     rotation_matrix = torch.tensor([[cos(init_orientation), -sin(init_orientation)],
                                     [sin(init_orientation), cos(init_orientation)]])

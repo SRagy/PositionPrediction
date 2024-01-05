@@ -85,7 +85,7 @@ class Simulator:
                 speed: Tensor = torch.tensor(7.), # 7m/s about 25km/h or 13.5 knots.
                 orientation: Tensor = torch.tensor(0.), 
                 rudder_angle: Tensor = torch.tensor(0.)):
-        """Evaluates 
+        """Simulates the trajectory.
 
         Args:
             position (Tensor, optional): position at initialisation. Defaults to torch.tensor([0.,0.]).
@@ -114,7 +114,7 @@ class Simulator:
                 speed: Tensor = torch.tensor(7.), # 7m/s about 25km/h or 13.5 knots.
                 orientation: Tensor = torch.tensor(0.), 
                 rudder_angle: Tensor = torch.tensor(0.)):
-        """Evaluates 
+        """Simulates the trajectory
 
         Args:
             position (Tensor, optional): position at initialisation. Defaults to torch.tensor([0.,0.]).
