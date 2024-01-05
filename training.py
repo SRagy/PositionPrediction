@@ -175,7 +175,7 @@ class Trainer:
         print(f'\r epoch = {self._trained_epochs}, '
               f'train loss = {train_loss:.3e}, '
               f'val loss = {val_loss:.3e}, '
-              f'epochs since improvement = {since_improvement}', end='')
+              f'epochs since improvement = {since_improvement}   ', end='')
 
 
     def train(self, epochs = 200):

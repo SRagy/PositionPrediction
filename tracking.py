@@ -71,10 +71,10 @@ class Tracker:
             mask_x = area[0,0] < points[0] < area[0,1]
             mask_y = area[1,0] < points[1] < area[1,1]
         else:
-            mask_x = area[0,0] < points[:,0] < area[0,1]
-            mask_y = area[1,0] < points[:,1] < area[1,1]
+            mask_x = torch.logical_and(area[0,0] < points[:,0], points[:,0] < area[0,1])
+            mask_y = torch.logical_and(area[1,0] < points[:,1], points[:,1] < area[1,1])
 
-        mask = mask_x and mask_y
+        mask = torch.logical_and(mask_x, mask_y)
 
         if not is_single_point and not all(mask):
             warnings.warn("not all points to check are in area of interest, some will be ignored")
@@ -134,7 +134,7 @@ class SamplingTracker(Tracker):
     def __init__(self, density_estimator: Flow, 
                  scan_radius: int, 
                  area_of_interest: Tensor = None, 
-                 num_samples: int = 1000):
+                 num_samples: int = 10000):
         """Init function for sampling tracker
 
         Args:
@@ -143,7 +143,7 @@ class SamplingTracker(Tracker):
             area_of_interest (Tensor, optional): are in which to search. Defaults to None.
             num_samples (int): the number of points to sample for checking. Defaults to 1000.
         """
-        points_to_check = density_estimator.sample(num_samples)
+        points_to_check = density_estimator.sample(num_samples).detach()
         return super().__init__(density_estimator, scan_radius, area_of_interest, points_to_check)
 
 class GridTracker(Tracker):
@@ -152,7 +152,8 @@ class GridTracker(Tracker):
     matching scan_radius as closely as possible (subject to the constraint of full coverage).
 
     If no area_of_interest is given, then one will be defined as multiple of the minimum bounding
-    box of all points in points_to_check. If neither is given will raise an error.
+    box of all points in points_to_check. If neither is given, points will be generated from the
+    density estimator.
 
     Attributes:
         density_estimator: A normalising flow.
@@ -172,11 +173,12 @@ class GridTracker(Tracker):
             density_estimator (Flow): A density estimator for trajectory end points
             scan_radius (int): 
             area_of_interest (Tensor, optional): area_of_interest. Defaults to None.
-            points_to_check (Tensor, optional): _description_. Defaults to None.
+            points_to_check (Tensor, optional): Points around which we'd like to scan. Defaults to None.
         """
         if area_of_interest is None:
             if points_to_check is None:
-                raise ValueError("At least one of area_of_interest and points_to_check should be defined")
+                points_to_check = density_estimator.sample(10000).detach()
+                area_of_interest = self._generate_AOI_from_points(points_to_check)
             else:
                 area_of_interest = self._generate_AOI_from_points(points_to_check)
 
@@ -219,7 +221,7 @@ class GridTracker(Tracker):
 
         return torch.cartesian_prod(horizontal_centres, vertical_centres)
 
-    def _generate_AOI_from_points(self, points: Tensor, mult_factor: float = 1.2):
+    def _generate_AOI_from_points(self, points: Tensor, mult_factor: float = 1.05):
         """Generates area of interest as function of the minimum enclosing box of the points.
         The multiplication factor grows or shrinks the minimum enclosing box.
 
@@ -229,8 +231,8 @@ class GridTracker(Tracker):
         Returns:
             Tensor: _description_
         """
-        axes_max = points.max(dim=0)
-        axes_min = points.min(dim=0)
+        axes_max = points.max(dim=0).values
+        axes_min = points.min(dim=0).values
 
 
         mid_point = (axes_max + axes_min)/2
