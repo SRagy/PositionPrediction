@@ -145,7 +145,7 @@ class SamplingTracker2D(Tracker2D):
             area_of_interest (Tensor, optional): are in which to search. Defaults to None.
             num_samples (int): the number of points to sample for checking. Defaults to 1000.
         """
-        points_to_check = density_estimator.sample(num_samples).detach()
+        points_to_check = density_estimator.sample(num_samples).cpu().detach()
         return super().__init__(density_estimator, scan_radius, area_of_interest, points_to_check)
 
 class GridTracker2D(Tracker2D):
@@ -180,7 +180,7 @@ class GridTracker2D(Tracker2D):
 
         if area_of_interest is None:
             if points_to_check is None:
-                points_to_check = density_estimator.sample(1000).detach()
+                points_to_check = density_estimator.sample(1000).cpu().detach()
                 area_of_interest = self._generate_AOI_from_points(points_to_check)
             else:
                 area_of_interest = self._generate_AOI_from_points(points_to_check)
