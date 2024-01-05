@@ -9,31 +9,11 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from typing import Tuple, Callable
 
-from nflows.flows import Flow
-from nflows.distributions import StandardNormal
-from nflows.transforms import MaskedPiecewiseRationalQuadraticAutoregressiveTransform
+from flow import UnconditionalFlow
 
 from simulator import Simulator
 
 
-def get_default_flow():
-    """Function to get a normalising flow object. Uses a simple default architecture.
-
-    Returns:
-        Flow: A neural spline flow
-    """
-    # We have 2-d vectors on a plane, so shape = features = 2.
-    base_dist = StandardNormal(shape=[2])
-    transform = MaskedPiecewiseRationalQuadraticAutoregressiveTransform(
-        features = 2,
-        hidden_features=20,
-        num_bins=10,
-        tails='linear',
-        tail_bound=10.,
-        num_blocks=10,
-        use_batch_norm=True
-    )
-    return Flow(transform, base_dist)
 
 
 def get_dataloaders(file='end_points.pt', 
@@ -79,13 +59,28 @@ def get_dataloaders(file='end_points.pt',
     return train_loader, val_loader
 
 
+def get_default_flow(dataloader):
+    """Function to get a normalising flow object. Uses a simple default architecture.
+    
+    Args:
+        dataloader: a dataloader for the train process
+    Returns:
+        Flow: A neural spline flow
+    """
+    # We need to initialise with one batch for z-scoring, hence the one-step loop.
+    for i in dataloader:
+        flow = UnconditionalFlow(i)
+        break
+    
+    return flow
+
 class Trainer:
     """Class for training a normalising flow.
 
     Attributes:
-        density_estimator - a trainable estimator with 
-        train_losses - a per epoch record of the training loss
-        val_losses - a per epoch record of the validation loss.
+        density_estimator (Flow) - a trainable estimator with 
+        train_losses (list) - a per epoch record of the training loss
+        val_losses (list) - a per epoch record of the validation loss.
     """
     def __init__(self,
                  train_loader: DataLoader,
