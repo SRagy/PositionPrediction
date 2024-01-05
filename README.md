@@ -1,3 +1,10 @@
+# Installation
+
+```
+git clone https://github.com/SRagy/PositionPrediction.git
+pip install -r requirements.txt
+```
+
 # Location prediction using density estimation
 This section of the README acts as a write-up and rationale. The [Package Structure](./README.md#Package-Structure) section outlines the package structure and use. If you're busy and would rather just dive in with an example, check out the [Track and Visualise Notebook](./TrackAndVisualise.ipynb).
 
