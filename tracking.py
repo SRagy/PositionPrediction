@@ -49,7 +49,8 @@ class Tracker2D:
         Returns:
             Tensor: Batch of n points ranked by likelihood.
         """
-
+        device = self.density_estimator.device
+        points = points.to(device)
         densities = self.density_estimator.log_prob(points).cpu().detach()
         density_rank_index = densities.sort(descending=True).indices
 
