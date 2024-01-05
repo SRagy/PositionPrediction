@@ -84,8 +84,8 @@ class Trainer:
 
     Attributes:
         density_estimator - a trainable estimator with 
-    
-
+        train_losses - a per epoch record of the training loss
+        val_losses - a per epoch record of the validation loss.
     """
     def __init__(self,
                  train_loader: DataLoader,
