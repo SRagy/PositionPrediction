@@ -76,7 +76,8 @@ class Tracker2D:
             mask_y = torch.logical_and(area[1,0] < points[:,1], points[:,1] < area[1,1])
 
         mask = torch.logical_and(mask_x, mask_y)
-
+        
+        # This warning is going off when it shouldn't. Need to check why.
         if not is_single_point and not all(mask):
             warnings.warn("not all points to check are in area of interest, some will be ignored")
        
