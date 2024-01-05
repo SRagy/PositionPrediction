@@ -14,7 +14,7 @@ from flow import UnconditionalFlow
 from simulator import Simulator
 
 
-def get_dataloaders(file='end_points.pt', 
+def get_dataloaders(file='data/end_points.pt', 
                     batch_size: int = 64, 
                     val_ratio: float = 0.1, 
                     save_data: bool = True, 
@@ -22,7 +22,7 @@ def get_dataloaders(file='end_points.pt',
     """Utility function for obtaining training and validation dataloaders
 
     Args:
-        file (str, optional): File to load data from, if available. Defaults to 'end_points.pt'.
+        file (str, optional): File to load data from, if available. Defaults to 'data/end_points.pt'.
         batch_size (int, optional): Defaults to 64.
         val_ratio (float, optional): Fraction of the data to use for validation.  Defaults to 0.1.
         save_data (bool, optional): If True then new data generated will be saved to disk. Defaults to True.

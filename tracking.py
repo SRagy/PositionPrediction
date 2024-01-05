@@ -37,7 +37,7 @@ class Tracker2D:
         self.density_estimator = density_estimator
         self.scan_radius = scan_radius
         self.area_of_interest = area_of_interest
-        self.points_to_check = points_to_check
+        self.points_to_check = points_to_check.cpu().detach()
 
 
     def _rank_points(self, points: Tensor):
@@ -50,7 +50,7 @@ class Tracker2D:
             Tensor: Batch of n points ranked by likelihood.
         """
 
-        densities = self.density_estimator.log_prob(points)
+        densities = self.density_estimator.log_prob(points).cpu().detach()
         density_rank_index = densities.sort(descending=True).indices
 
         return points[density_rank_index]
@@ -145,7 +145,7 @@ class SamplingTracker2D(Tracker2D):
             area_of_interest (Tensor, optional): are in which to search. Defaults to None.
             num_samples (int): the number of points to sample for checking. Defaults to 1000.
         """
-        points_to_check = density_estimator.sample(num_samples).cpu().detach()
+        points_to_check = density_estimator.sample(num_samples)
         return super().__init__(density_estimator, scan_radius, area_of_interest, points_to_check)
 
 class GridTracker2D(Tracker2D):
