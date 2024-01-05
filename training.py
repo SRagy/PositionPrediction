@@ -1,7 +1,7 @@
 from os.path import exists
 
 import torch
-from torch import Tensor
+from torch import Tensor, device
 from torch.nn import CrossEntropyLoss, Module
 from torch.optim import Optimizer, Adam
 from torch.optim.lr_scheduler import _LRScheduler, ReduceLROnPlateau
@@ -12,8 +12,6 @@ from typing import Tuple, Callable
 from flow import UnconditionalFlow
 
 from simulator import Simulator
-
-
 
 
 def get_dataloaders(file='end_points.pt', 
@@ -28,10 +26,10 @@ def get_dataloaders(file='end_points.pt',
         batch_size (int, optional): Defaults to 64.
         val_ratio (float, optional): Fraction of the data to use for validation.  Defaults to 0.1.
         save_data (bool, optional): If True then new data generated will be saved to disk. Defaults to True.
-        simulator_args (Tuple[int,...], optional): _description_. Defaults to None.
+        simulator_args (Tuple[int,...], optional): arguments for simulator if generating new data. Defaults to None.
 
     Returns:
-        _type_: _description_
+        Tuple(Dataloader): Training and validation dataloaders
     """
     
 
@@ -59,11 +57,12 @@ def get_dataloaders(file='end_points.pt',
     return train_loader, val_loader
 
 
-def get_default_flow(dataloader):
+def get_default_flow(dataloader: DataLoader, device=torch.device('cpu')):
     """Function to get a normalising flow object. Uses a simple default architecture.
     
     Args:
-        dataloader: a dataloader for the train process
+        dataloader (DataLoader): a dataloader for the train process
+        device (device, optional): torch device. Defaults to cpu.
     Returns:
         Flow: A neural spline flow
     """
@@ -72,7 +71,7 @@ def get_default_flow(dataloader):
         flow = UnconditionalFlow(i)
         break
     
-    return flow
+    return flow.to(device)
 
 class Trainer:
     """Class for training a normalising flow.
@@ -91,6 +90,7 @@ class Trainer:
                  optimizer: Optimizer = Adam,
                  base_learning_rate: float = 0.01,
                  use_lr_scheduler: bool = True,
+                 device = torch.device('cpu')
                  ) -> None:
         """
         Inits Trainer.
@@ -113,6 +113,7 @@ class Trainer:
         self._early_stop_bound = early_stop_bound
         self._max_epochs = max_epochs
         self._trained_epochs = 0
+        self._device = device
 
         optimisation_parameters = density_estimator.parameters()
         self._optimizer = optimizer(optimisation_parameters, lr=base_learning_rate)
@@ -146,6 +147,7 @@ class Trainer:
         self.density_estimator.train()
         total_loss = 0.
         for params in dataloader:
+            params.to(self._device)
             loss = self._loss(params)
             total_loss+=loss.detach()
             self._optimizer.zero_grad()
