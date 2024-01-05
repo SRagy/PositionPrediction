@@ -15,6 +15,7 @@ def multiple_trajectory_plot(trajectories):
         trajectory_plot(trajectory, ax)
 
 def density_plot(samples):
+    samples = samples.cpu().detach()
     samples_switched = torch.stack([samples[:,1],samples[:,0]],dim=1)
     pairplot(samples_switched)
 
