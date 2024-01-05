@@ -68,7 +68,7 @@ def get_default_flow(dataloader: DataLoader, device=torch.device('cpu')):
     """
     # We need to initialise with one batch for z-scoring, hence the one-step loop.
     for i in dataloader:
-        flow = UnconditionalFlow(i)
+        flow = UnconditionalFlow(i, device=device)
         break
     
     return flow.to(device)
@@ -164,7 +164,7 @@ class Trainer:
         """
         self.density_estimator.eval()
         dataset = dataloader.dataset.to(self._device)
-        loss = self._loss(dataloader.dataset)
+        loss = self._loss(dataset)
         return loss
     
     def log_and_print(self, train_loss, val_loss, since_improvement):
