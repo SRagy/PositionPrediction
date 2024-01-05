@@ -23,14 +23,14 @@ class Tracker:
 
     """
     def __init__(self, density_estimator: Flow,
-                 scan_radius: int,
+                 scan_radius: float,
                  area_of_interest: Tensor = None,
                  points_to_check: Tensor = None):
         """Initialises Base Tracker class
 
         Args:
             density_estimator (Flow): A density estimator for trajectory end points
-            scan_radius (int): 'radius' of scanning area; half side-length of square scanning region.
+            scan_radius (float): 'radius' of scanning area; half side-length of square scanning region.
             area_of_interest (Tensor, optional): Area to search in. Defaults to None.
             points_to_check (Tensor, optional): Points to check. Defaults to None.
         """
@@ -49,6 +49,7 @@ class Tracker:
         Returns:
             Tensor: Batch of n points ranked by likelihood.
         """
+
         densities = self.density_estimator.log_prob(points)
         density_rank_index = densities.sort().indices
 
@@ -132,14 +133,14 @@ class SamplingTracker(Tracker):
 
     """
     def __init__(self, density_estimator: Flow, 
-                 scan_radius: int, 
+                 scan_radius: float, 
                  area_of_interest: Tensor = None, 
                  num_samples: int = 10000):
         """Init function for sampling tracker
 
         Args:
             density_estimator (Flow): A density estimator for trajectory end points
-            scan_radius (int): 'radius' of scanning area; half side-length of square scanning region.
+            scan_radius (float): 'radius' of scanning area; half side-length of square scanning region.
             area_of_interest (Tensor, optional): are in which to search. Defaults to None.
             num_samples (int): the number of points to sample for checking. Defaults to 1000.
         """
@@ -164,20 +165,21 @@ class GridTracker(Tracker):
         simulate_tracking: Given the true location, simulate how tracker would behave.
     """
     def __init__(self, density_estimator: Flow,
-                 scan_radius: int,
+                 scan_radius: float,
                  area_of_interest: Tensor = None,
                  points_to_check: Tensor = None):
         """Initialises Tracker class
 
         Args:
             density_estimator (Flow): A density estimator for trajectory end points
-            scan_radius (int): 
-            area_of_interest (Tensor, optional): area_of_interest. Defaults to None.
+            scan_radius (float): The side-length of the square scanning area.
+            area_of_interest (Tensor, optional): The entire area in which we want to scan. Defaults to None.
             points_to_check (Tensor, optional): Points around which we'd like to scan. Defaults to None.
         """
+
         if area_of_interest is None:
             if points_to_check is None:
-                points_to_check = density_estimator.sample(10000).detach()
+                points_to_check = density_estimator.sample(1000).detach()
                 area_of_interest = self._generate_AOI_from_points(points_to_check)
             else:
                 area_of_interest = self._generate_AOI_from_points(points_to_check)
@@ -231,6 +233,7 @@ class GridTracker(Tracker):
         Returns:
             Tensor: _description_
         """
+
         axes_max = points.max(dim=0).values
         axes_min = points.min(dim=0).values
 

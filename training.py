@@ -183,7 +183,7 @@ class Trainer:
         already exceeds max_epochs raises an exception.
 
         Args:
-            epochs (int, optional): Epochs to train for. Defaults to 200.
+            epochs (int, optional): Max epochs to train for. Defaults to 200.
 
         Returns:
             Module: Trained normalising flow
