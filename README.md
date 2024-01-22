@@ -2,6 +2,7 @@
 
 ```
 git clone https://github.com/SRagy/PositionPrediction.git
+cd PositionPrediction
 pip install -r requirements.txt
 ```
 
