@@ -9,14 +9,16 @@ pip install -r requirements.txt
 # Location prediction using density estimation
 This section of the README acts as a write-up and rationale. The [Package Structure](./README.md#Package-Structure) section outlines the package structure and use. If you're busy and would rather just dive in with an example, check out the [Track and Visualise Notebook](./TrackAndVisualise.ipynb/).
 
-This is a small toy project to predict the paths of moving objects, e.g. marine vessels. Its main purpose is as a CV-padder, so it is relatively simple, but if it contains any code which you find useful, feel free to use it with reference. 
+This is a small toy project to predict the paths of moving objects, e.g. marine vessels. It is a relatively simple proof-of-principle, but if it contains any code which you find useful, feel free to use it. 
+
+The motivation is of a satellite-tracking problem with sparse data: suppose you wish to visually track a vessel using satellites. This task is hindered by several factors, including limited access to the satellite, limited coverage of the area with available statellites, and clouds. Opportunities for observations may be rare, and for cost-purposes it may be necessary to limit the scanning area and time. This means we need to know where to look next. Given our last observation, where is it most likely that the ship is? If we have a good guess, we can implement more intelligent scanning strategies, which focus on most likely positions first.
 
 ## Theoretical considerations
 ### Trajectories
 
-Strictly speaking, this project does not predict trajectories - it predicts future locations after a set time has passed, i.e. the end-point of the trajectory up to that time. For many purposes this implementation is sufficient; if we are tracking an object using observations at fixed time intervals then information of what is happening *between* those intervals is extraneous. 
+Strictly speaking, this project does not predict trajectories - it predicts future locations after a set time has passed, i.e. the end-point of the trajectory up to that time. For many purposes this implementation is sufficient; if we are limited to tracking an object using observations at fixed time intervals then predicting information of what is happening *between* those intervals is arguably extraneous.
 
-It could be altered to predict trajectories by outputting a vector of locations, or by making it conditional on time.
+It could be altered to predict trajectories by outputting a sequence of locations with small time steps, or by making it continuously conditional on time.
 
 ### Isn't this just object tracking?
 
@@ -25,7 +27,7 @@ No. Object tracking is about consistent identification of an object and its loca
 Here I assume that a method for object-identification already exits, but that the object is rarely observed, which is not the same as in object tracking.
 
 ### Does this relate to Kalman filtering?
-Kalman filtering is used in similar situations and may have some use for a real-world extension of this sort of application, although I haven't thought about it deeply. Given a model, Kalman filtering reconciles the stochastic dynamics of the model with the noisy real-world observations of its outcomes. Here I'm assuming noiseless observations and, in its present state, I haven't implemented multi-step tracking, although it is not a big extension of the current code to do so. In short, Kalman filtering is not relevant to this example, but might have application to a more sophisticated one.
+Kalman filtering is used in similar situations and may have some use for a real-world extension of this sort of application. Given a model, Kalman filtering reconciles the stochastic dynamics of the model with the noisy real-world observations of its outcomes. Here I'm assuming noiseless observations and, in its present state, I haven't implemented multi-step tracking, although it is not a big extension of the current code to do so. In short, Kalman filtering is not relevant to this example, but might have application to a more sophisticated one.
 
 ### Stochastic processes need stochastic predictions
 For a stochastic process, even given the exact same input conditions, the outcome is not guaranteed. This is sometimes considered to be because of latent unobserved variables, but if you ask a quantum physicist, it is a fundamental property of performing observations.
